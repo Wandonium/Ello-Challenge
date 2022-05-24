@@ -23,8 +23,7 @@ const FEED_QUERY = gql`
 
 function App() {
   const { data, loading, error } = useQuery(FEED_QUERY);
-  console.log('screen width: ', window.screen.width);
-  console.log('data: ', JSON.stringify(data, null, 2));
+  // console.log('data: ', JSON.stringify(data, null, 2));
 
 
   useEffect(() => {
@@ -78,6 +77,21 @@ function App() {
     }
   }, [data]);
 
+  const getPageContent = (content, tokens) => {
+    let newContent = content;
+    let mContent = '';
+    if(tokens.length !== 0) {
+      let tk = tokens[0];
+      let word = newContent.substring(tk.position[0], tk.position[1]);
+      let element = `<a href="https://google.com">${word}</a>`
+      console.log('element: ', element);
+      let re = new RegExp(tk.value, 'i');
+      mContent = newContent.replace(re, element);
+      console.log('mContent: ', mContent);
+    }
+    return <p>{mContent}</p>;
+  }
+
 
 
   return (
@@ -98,11 +112,54 @@ function App() {
                 </div>
               </div>
               {data.book.pages.map(page => {
+                let mContent = '';
+                let cnt = page.content;
+                if(page.tokens.length !== 0 /*&& page.pageIndex === 1*/) {
+                  {/* page.tokens.forEach(token => {
+                    let word = page.content.substring(token.position[0], token.position[1]);
+                    let element = `<a href="https://google.com" class="link">${word}</a>`
+                    let re = new RegExp(token.value, 'i');
+                    console.log(`replacing ${token.value} with ${element}`);
+                    mContent = mContent.replace(re, element);
+                    console.log('mContent: ', mContent);
+                    let start = token.position[0];
+                    console.log('start: ', start);
+                    let end = token.position[1];
+                    console.log('end: ', end);
+                    let word = page.content.substring(token.position[0], token.position[1]);
+                    console.log('word: ', word);
+                    let element = `<a href="https://google.com" class="link">${word}</a>`;
+                    console.log('element: ', element);
+                    if(start === 0) {
+                      mContent = mContent + element + cnt.substring(end, cnt.length);
+                    } else {
+                      let indexOf = mContent.indexOf(word);
+                      mContent = mContent.substring(0, indexOf) + element + cnt.substring(end, cnt.length); 
+                    }
+                    console.log('mContent: ', mContent);
+                  }); */}
+                  for(let i = 0; i < page.tokens.length; i++) {
+                    let tk = page.tokens[i];
+                    let start = tk.position[0];
+                    let end = 0;
+                    if(i < page.tokens.length -1) {
+                      end = page.tokens[i+1].position[0];
+                    } else {
+                      end = tk.position[1];
+                    }
+                    let tmp = cnt.substring(start, end);
+                    let word = cnt.substring(tk.position[0], tk.position[1]);
+                    let element = `<a href="https://google.com" class="link">${word}</a>`
+                    let re = new RegExp(tk.value, 'i');
+                    mContent = mContent + tmp.replace(re, element);
+                    {/* console.log('mContent: ', mContent); */}
+                  }
+                }
                 return (
                   <div className="page" key={page.pageIndex}>
                     <div className="page-content">
                       <div className="page-header">{'Page ' + (page.pageIndex + 1)}</div>
-                      <div className="page-text">{page.content}</div>
+                      <div className="page-text" dangerouslySetInnerHTML = {{ __html: mContent}} />
                       <div className="page-footer">{'No of tokens: ' + page.tokens.length}</div>
                     </div>
                   </div>
