@@ -1,8 +1,9 @@
 import './App.css';
 import { useQuery, gql } from '@apollo/client';
 import { PageFlip } from 'page-flip';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import backgroundImage from './images/background.jpg';
+import Tokens from './Tokens';
 
 const FEED_QUERY = gql`
   {
@@ -24,6 +25,8 @@ const FEED_QUERY = gql`
 function App() {
   const { data, loading, error } = useQuery(FEED_QUERY);
   // console.log('data: ', JSON.stringify(data, null, 2));
+
+  const [token, setToken] = useState(null);
 
 
   useEffect(() => {
@@ -51,6 +54,25 @@ function App() {
       document.querySelector(
           ".page-orientation"
       ).innerText = pageFlip.getOrientation();
+
+      document.querySelectorAll(".link").forEach(item => {
+        item.addEventListener("click", (event) => {
+          event.preventDefault();
+          let theId = event.target.id;
+          let start = theId.indexOf('-');
+          let tmp = theId.substring(start+1, theId.length);
+          let end = tmp.indexOf('-');
+          let pageIndex = parseInt(tmp.substring(0, end));
+          console.log('pageIndex: ', pageIndex);
+          tmp = tmp.substring(end + 1, tmp.length);
+          start = tmp.indexOf('-');
+          let tokenIndex = parseInt(tmp.substring(start + 1, tmp.length));
+          console.log('tokenIndex: ', tokenIndex);
+          let token = data.book.pages[pageIndex].tokens[tokenIndex].value;
+          console.log('token: ', token);
+          setToken(token);
+        });
+      });
   
       document.querySelector(".btn-prev").addEventListener("click", () => {
           pageFlip.flipPrev(); // Turn to the previous page (with animation)
@@ -77,21 +99,6 @@ function App() {
     }
   }, [data]);
 
-  const getPageContent = (content, tokens) => {
-    let newContent = content;
-    let mContent = '';
-    if(tokens.length !== 0) {
-      let tk = tokens[0];
-      let word = newContent.substring(tk.position[0], tk.position[1]);
-      let element = `<a href="https://google.com">${word}</a>`
-      console.log('element: ', element);
-      let re = new RegExp(tk.value, 'i');
-      mContent = newContent.replace(re, element);
-      console.log('mContent: ', mContent);
-    }
-    return <p>{mContent}</p>;
-  }
-
 
 
   return (
@@ -101,7 +108,8 @@ function App() {
         <div className="spinner-border" style={{width: '3rem', height: '3rem'}}></div>
       </div>}
       {error && <pre className="loading">{JSON.stringify(error, null, 2)}</pre>}
-      { data && (
+      {token && <Tokens token={token} />}
+      { data && !token && (
         <div style={{paddingTop: '100px'}}>
           <div className="container">
             <div className="flip-book html-book demo-book" id="demoBookExample" style={{backgroundImage: backgroundImage}}>
@@ -114,30 +122,7 @@ function App() {
               {data.book.pages.map(page => {
                 let mContent = '';
                 let cnt = page.content;
-                if(page.tokens.length !== 0 /*&& page.pageIndex === 1*/) {
-                  {/* page.tokens.forEach(token => {
-                    let word = page.content.substring(token.position[0], token.position[1]);
-                    let element = `<a href="https://google.com" class="link">${word}</a>`
-                    let re = new RegExp(token.value, 'i');
-                    console.log(`replacing ${token.value} with ${element}`);
-                    mContent = mContent.replace(re, element);
-                    console.log('mContent: ', mContent);
-                    let start = token.position[0];
-                    console.log('start: ', start);
-                    let end = token.position[1];
-                    console.log('end: ', end);
-                    let word = page.content.substring(token.position[0], token.position[1]);
-                    console.log('word: ', word);
-                    let element = `<a href="https://google.com" class="link">${word}</a>`;
-                    console.log('element: ', element);
-                    if(start === 0) {
-                      mContent = mContent + element + cnt.substring(end, cnt.length);
-                    } else {
-                      let indexOf = mContent.indexOf(word);
-                      mContent = mContent.substring(0, indexOf) + element + cnt.substring(end, cnt.length); 
-                    }
-                    console.log('mContent: ', mContent);
-                  }); */}
+                if(page.tokens.length !== 0) {
                   for(let i = 0; i < page.tokens.length; i++) {
                     let tk = page.tokens[i];
                     let start = tk.position[0];
@@ -145,14 +130,30 @@ function App() {
                     if(i < page.tokens.length -1) {
                       end = page.tokens[i+1].position[0];
                     } else {
-                      end = tk.position[1];
+                      end = page.content.length;
                     }
-                    let tmp = cnt.substring(start, end);
-                    let word = cnt.substring(tk.position[0], tk.position[1]);
-                    let element = `<a href="https://google.com" class="link">${word}</a>`
-                    let re = new RegExp(tk.value, 'i');
-                    mContent = mContent + tmp.replace(re, element);
-                    {/* console.log('mContent: ', mContent); */}
+                    if(page.pageIndex === 10 && i >= 42) {
+                      let tmp = cnt.substring(start, end);
+                      let element = `<a href="#" class="link" id="pageIndex-${page.pageIndex}-tokenIndex-${i}">${tmp}</a>`;
+                      mContent = mContent + element;
+                    } else {
+                      let tmp = cnt.substring(start, end);
+                      let word = cnt.substring(tk.position[0], tk.position[1]);
+                      let element = `<a href="#" class="link" id="pageIndex-${page.pageIndex}-tokenIndex-${i}">${word}</a>`
+                      {/* let element = `<a href="#" class="link" onClick={() => handleClick(tk)}>${word}</a>` */}
+                      let val = word.indexOf("’") === -1 ? tk.value : word;
+                      let re = new RegExp(val, 'i');
+                      {/* if(page.pageIndex === 10) {
+                        console.log('tmp: ', tmp);
+                        console.log('word: ', word);
+                        console.log('current token: ', i);
+                        console.log('element: ', element);
+                        console.log('re: ', re);
+                        console.log('regex test: ', re.test(tmp));
+                      } */}
+                      mContent = mContent + tmp.replace(re, element);
+                      {/* console.log('mContent: ', mContent); */}
+                    }
                   }
                 }
                 return (
