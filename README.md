@@ -89,7 +89,7 @@ ___
 
 ## To Run the App
 ```
-$ git clone
+$ git clone https://github.com/Wandonium/Ello-Challenge.git
 $ npm i
 $ npm start
 ```
