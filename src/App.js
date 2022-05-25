@@ -27,6 +27,9 @@ function App() {
   // console.log('data: ', JSON.stringify(data, null, 2));
 
   const [token, setToken] = useState(null);
+  const [content, setContent] = useState(null);
+  const [reload, setReload] = useState(false);
+  const [page, setPage] = useState(0);
 
 
   useEffect(() => {
@@ -51,9 +54,6 @@ function App() {
       );
       pageFlip.loadFromHTML(document.querySelectorAll(".page"));
       document.querySelector(".page-total").innerText = pageFlip.getPageCount();
-      document.querySelector(
-          ".page-orientation"
-      ).innerText = pageFlip.getOrientation();
 
       document.querySelectorAll(".link").forEach(item => {
         item.addEventListener("click", (event) => {
@@ -63,14 +63,16 @@ function App() {
           let tmp = theId.substring(start+1, theId.length);
           let end = tmp.indexOf('-');
           let pageIndex = parseInt(tmp.substring(0, end));
-          console.log('pageIndex: ', pageIndex);
+          // console.log('pageIndex: ', pageIndex);
           tmp = tmp.substring(end + 1, tmp.length);
           start = tmp.indexOf('-');
           let tokenIndex = parseInt(tmp.substring(start + 1, tmp.length));
-          console.log('tokenIndex: ', tokenIndex);
-          let token = data.book.pages[pageIndex].tokens[tokenIndex].value;
-          console.log('token: ', token);
+          // console.log('tokenIndex: ', tokenIndex);
+          let token = data.book.pages[pageIndex].tokens[tokenIndex];
+          let content = data.book.pages[pageIndex].content;
+          // console.log('token: ', token);
           setToken(token);
+          setContent(content);
         });
       });
   
@@ -85,19 +87,12 @@ function App() {
       // triggered by page turning
       pageFlip.on("flip", (e) => {
           document.querySelector(".page-current").innerText = e.data + 1;
+          setPage(e.data + 1);
       });
-  
-      // triggered when the state of the book changes
-      pageFlip.on("changeState", (e) => {
-          document.querySelector(".page-state").innerText = e.data;
-      });
-  
-      // triggered when page orientation changes
-      pageFlip.on("changeOrientation", (e) => {
-          document.querySelector(".page-orientation").innerText = e.data;
-      });
+
+      pageFlip.flip(page, 'top');
     }
-  }, [data]);
+  }, [data, reload]);
 
 
 
@@ -108,7 +103,14 @@ function App() {
         <div className="spinner-border" style={{width: '3rem', height: '3rem'}}></div>
       </div>}
       {error && <pre className="loading">{JSON.stringify(error, null, 2)}</pre>}
-      {token && <Tokens token={token} />}
+      {token && <Tokens 
+                  token={token} 
+                  reload={reload}
+                  pageContent={content} 
+                  setToken={setToken} 
+                  setReload={setReload} 
+                />
+      }
       { data && !token && (
         <div style={{paddingTop: '100px'}}>
           <div className="container">
@@ -125,32 +127,47 @@ function App() {
                 if(page.tokens.length !== 0) {
                   for(let i = 0; i < page.tokens.length; i++) {
                     let tk = page.tokens[i];
-                    let start = tk.position[0];
+                    let start = (page.pageIndex === 7 && i>=23 && i < 27) ? tk.position[0] - 1 : tk.position[0];
                     let end = 0;
-                    if(i < page.tokens.length -1) {
+                    if(page.pageIndex === 7 && i>=23 && i < 27) {
+                      end = page.tokens[i].position[1];
+                    } else if(i < page.tokens.length - 1){
                       end = page.tokens[i+1].position[0];
                     } else {
                       end = page.content.length;
                     }
-                    if(page.pageIndex === 10 && i >= 42) {
+                    if(
+                        (page.pageIndex === 10 && i >= 42) ||
+                        (page.pageIndex === 7 && i>=23 && i < 27)
+                     ) {
                       let tmp = cnt.substring(start, end);
                       let element = `<a href="#" class="link" id="pageIndex-${page.pageIndex}-tokenIndex-${i}">${tmp}</a>`;
                       mContent = mContent + element;
+                      if(page.pageIndex === 7) {
+                        console.log('tmp: ', tmp);
+                        console.log('current token: ', i);
+                        console.log('start: ', start);
+                        console.log('end: ', end);
+                        console.log('index of token in content: ', cnt.indexOf(tk.value));
+                        console.log('element: ', element);
+                      }
                     } else {
                       let tmp = cnt.substring(start, end);
                       let word = cnt.substring(tk.position[0], tk.position[1]);
                       let element = `<a href="#" class="link" id="pageIndex-${page.pageIndex}-tokenIndex-${i}">${word}</a>`
-                      {/* let element = `<a href="#" class="link" onClick={() => handleClick(tk)}>${word}</a>` */}
                       let val = word.indexOf("’") === -1 ? tk.value : word;
                       let re = new RegExp(val, 'i');
-                      {/* if(page.pageIndex === 10) {
+                      if(page.pageIndex === 7) {
                         console.log('tmp: ', tmp);
                         console.log('word: ', word);
                         console.log('current token: ', i);
+                        console.log('start: ', start);
+                        console.log('end: ', end);
+                        console.log('index of token in content: ', cnt.indexOf(tk.value));
                         console.log('element: ', element);
                         console.log('re: ', re);
-                        console.log('regex test: ', re.test(tmp));
-                      } */}
+                        {/* console.log('regex test: ', re.test(tmp)); */}
+                      }
                       mContent = mContent + tmp.replace(re, element);
                       {/* console.log('mContent: ', mContent); */}
                     }
@@ -181,10 +198,6 @@ function App() {
                     <button type="button" className="btn btn-info btn-prev">Previous page</button>
                     [<span className="page-current">1</span> of <span className="page-total">-</span>]
                     <button type="button" className="btn btn-info btn-next">Next page</button>
-                  </div>
-
-                  <div className='col-md-6'>
-                    State: <i className="page-state">read</i>, orientation: <i className="page-orientation">landscape</i>
                   </div>
                 </div>
               </div>

@@ -105,6 +105,27 @@ body {
     color: #785e3a;
 }
 
+.my-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    padding: 0rem 5rem;
+}
+
+.spanContent {
+    font-style: italic;
+}
+
+.emphasis {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: blue;
+    filter: brightness(110%) saturate(140%);   
+}
+
 @media screen and (max-width: 780px) {
     .page .page-content .page-text {
         font-size: 100%;
