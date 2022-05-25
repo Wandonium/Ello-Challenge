@@ -23,6 +23,7 @@ const FEED_QUERY = gql`
 `
 
 function App() {
+  // get data from GraphQL back-end using Apollo Client
   const { data, loading, error } = useQuery(FEED_QUERY);
   // console.log('data: ', JSON.stringify(data, null, 2));
 
@@ -34,6 +35,8 @@ function App() {
 
   useEffect(() => {
     if(data) {
+      // All this has to done here coz that's how page-flip is initialized
+      // check out https://nodlik.github.io/StPageFlip/demo.html in the JS tab.
       const pageFlip = new PageFlip(
         document.getElementById('demoBookExample'),
         {
@@ -58,6 +61,7 @@ function App() {
       document.querySelectorAll(".link").forEach(item => {
         item.addEventListener("click", (event) => {
           event.preventDefault();
+          // process the id tag of the <a> tag clicked for the page and token index
           let theId = event.target.id;
           let start = theId.indexOf('-');
           let tmp = theId.substring(start+1, theId.length);
@@ -127,50 +131,20 @@ function App() {
                 if(page.tokens.length !== 0) {
                   for(let i = 0; i < page.tokens.length; i++) {
                     let tk = page.tokens[i];
-                    let start = (page.pageIndex === 7 && i>=23 && i < 27) ? tk.position[0] - 1 : tk.position[0];
+                    let start = tk.position[0];
                     let end = 0;
-                    if(page.pageIndex === 7 && i>=23 && i < 27) {
-                      end = page.tokens[i].position[1];
-                    } else if(i < page.tokens.length - 1){
+                    if(i < page.tokens.length - 1){
                       end = page.tokens[i+1].position[0];
                     } else {
                       end = page.content.length;
                     }
-                    if(
-                        (page.pageIndex === 10 && i >= 42) ||
-                        (page.pageIndex === 7 && i>=23 && i < 27)
-                     ) {
-                      let tmp = cnt.substring(start, end);
-                      let element = `<a href="#" class="link" id="pageIndex-${page.pageIndex}-tokenIndex-${i}">${tmp}</a>`;
-                      mContent = mContent + element;
-                      if(page.pageIndex === 7) {
-                        console.log('tmp: ', tmp);
-                        console.log('current token: ', i);
-                        console.log('start: ', start);
-                        console.log('end: ', end);
-                        console.log('index of token in content: ', cnt.indexOf(tk.value));
-                        console.log('element: ', element);
-                      }
-                    } else {
-                      let tmp = cnt.substring(start, end);
-                      let word = cnt.substring(tk.position[0], tk.position[1]);
-                      let element = `<a href="#" class="link" id="pageIndex-${page.pageIndex}-tokenIndex-${i}">${word}</a>`
-                      let val = word.indexOf("’") === -1 ? tk.value : word;
-                      let re = new RegExp(val, 'i');
-                      if(page.pageIndex === 7) {
-                        console.log('tmp: ', tmp);
-                        console.log('word: ', word);
-                        console.log('current token: ', i);
-                        console.log('start: ', start);
-                        console.log('end: ', end);
-                        console.log('index of token in content: ', cnt.indexOf(tk.value));
-                        console.log('element: ', element);
-                        console.log('re: ', re);
-                        {/* console.log('regex test: ', re.test(tmp)); */}
-                      }
-                      mContent = mContent + tmp.replace(re, element);
-                      {/* console.log('mContent: ', mContent); */}
-                    }
+                    
+                    let tmp = cnt.substring(start, end);
+                    let word = cnt.substring(tk.position[0], tk.position[1]);
+                    let element = `<a href="#" class="link" id="pageIndex-${page.pageIndex}-tokenIndex-${i}">${word}</a>`
+                    let val = word.indexOf("’") === -1 ? tk.value : word;
+                    let re = new RegExp(val, 'i');
+                    mContent = mContent + tmp.replace(re, element);
                   }
                 }
                 return (

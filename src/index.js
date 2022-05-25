@@ -11,6 +11,7 @@ import {
   InMemoryCache
 } from '@apollo/client';
 
+// initializing apollo client
 const httpLink = createHttpLink({
   uri: 'https://fullstack-engineer-test-n4ouilzfna-uc.a.run.app/graphql'
 });
@@ -22,6 +23,7 @@ const client = new ApolloClient({
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  // passing down apollo client to child components
   <ApolloProvider client={client}>
     <App />
   </ApolloProvider>

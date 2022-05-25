@@ -126,7 +126,7 @@ body {
     filter: brightness(110%) saturate(140%);   
 }
 
-@media screen and (max-width: 780px) {
+@media screen and (max-width: 996px) {
     .page .page-content .page-text {
         font-size: 100%;
     }

@@ -1,70 +1,95 @@
-# Getting Started with Create React App
+# Ello Challenge
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Challenge
 
-## Available Scripts
+In this code challenge you will build a ReactJS web app from the ground up. You have to setup a GraphQL client to query our GraphQL API endpoint https://fullstack-engineer-test-n4ouilzfna-uc.a.run.app/graphql. The API will return a `book` object. You can learn more about GraphQL here https://graphql.org/learn/.
 
-In the project directory, you can run:
+The book has a field called `pages` which is an array of page objects. The page objects contain a field called `content` which is the page text and another field called `tokens` which is an array of tokenized page text.
 
-### `npm start`
+For example page content might look like this:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+"The quick-thinking boy earned 50 pennies."
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+and the `tokens` for this for this `content` looks like this
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+[
+{
+  "position": [
+    1,
+    4
+  ],
+  "value": "the"
+},
+{
+  "position": [
+    5,
+    10
+  ],
+  "value": "quick"
+},
+{
+  "position": [
+    11,
+    19
+  ],
+  "value": "thinking"
+},
+{
+  "position": [
+    20,
+    23
+  ],
+  "value": "boy"
+},
+{
+  "position": [
+    24,
+    30
+  ],
+  "value": "earned"
+},
+{
+  "position": [
+    31,
+    33
+  ],
+  "value": "fifty"
+},
+{
+  "position": [
+    34,
+    41
+  ],
+  "value": "pennies"
+}
+]
+```
 
-### `npm run build`
+`position` is an array containing the start and end index of a word.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Part 1
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The first task will be to map the `tokens` to the page `content`, and represent it in a view. The view should show the page `content` in its original format. The words should be clickable and when clicked they should take us to a second view which will display the token `value`. E.g If I click `50` in `"The quick-thinking boy earned 50 pennies."` It should open another view and pass `fifty` from the `tokens` array to that view.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Make sure to make the text large enough to be clickable. Also take into account how punctuation will react when the text is wrapped, i.e if `"The quick-thinking boy earned 50 pennies."` is wrapped the `"` should still be next to the `The`. They should not end up on different lines, even if we resize the screen.
 
-### `npm run eject`
+**Tip:** Avoid splitting page content using space or any other punctuation and using the index to get the token. In some edge cases this will fail, e.g. if you split using space then it will fail when we have hyphens. Think about how you can use the token `position` to extract clickable words e.g `The` should be the clickable word but not `"The`. The page `content` displayed must be **exactly** the same, do not delete punctuation or capitalize words.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Part 2
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Create a user interface for the book. It should show the left and right pages on a single view, there should be some navigation button that will allow a user to move to the next double page. This should work in tandem with Part 1, i.e. The content on each page should be clickable. Please note that some pages might have no content and that is okay; just show a blank page. The UI doesn't have to be complex. Avoid CSS frameworks.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+___
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## To Run the App
+```
+$ git clone
+$ npm i
+$ npm start
+```
